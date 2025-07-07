@@ -13,6 +13,10 @@
         <div class="users">
             <input class="user" id="player-1" placeholder="Your board.portal2.sr User" required>
             <input class="user" id="player-2" placeholder="Optional other User">
+            <select class="type">
+                <option value="sp">Singleplayer</option>
+                <option value="coop">Cooperative</option>
+            </select>
         </div>
         <div class="user_popup"></div>
         <p>the second player is optional, it will compare against the next ranked player if not set.</p>
@@ -23,6 +27,7 @@
         function main() {
             let player1 = document.querySelector("#player-1");
             let player2 = document.querySelector("#player-2");
+            let type = document.querySelector(".type");
             let points_url = document.querySelector(".points-url");
             let points_button = document.querySelector(".points-button");
             let user_popup = document.querySelector(".user_popup");
@@ -31,6 +36,9 @@
                 updateUrl();
             });
             player2.addEventListener("input", function() {
+                updateUrl();
+            });
+            type.addEventListener("change", function() {
                 updateUrl();
             });
 
@@ -55,8 +63,9 @@
             function updateUrl() {
                 let player1_id = player1.value.trim();
                 let player2_id = player2.value.trim();
+                let type_value = type.value;
 
-                let url = `https://alexadvdev.github.io/obs-points-comparison/points.html?userid=${player1_id}`;
+                let url = `https://alexadvdev.github.io/obs-points-comparison/points.html?userid=${player1_id}&type=${type_value}`;
                 if (player2_id !== "") {
                     url += `&compare_userid=${player2_id}`;
                 }
@@ -162,7 +171,7 @@
             align-items: center;
             margin-top: 20px;
         }
-        .user {
+        .user, .type {
             margin: 5px 0;
             padding: 10px;
             width: 300px;
