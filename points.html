@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Points Comparison</title>
+    </head>
+    <body>
+        <div id="player-1"><div class="player-label"></div><div class="points"></div><div class="delta"></div></div>
+        <div id="player-2"><div class="player-label"></div><div class="points"></div><div class="delta"></div></div>
+    </body>
+    <script>
+        if ("{{ username }}" === "") {
+            document.body.innerHTML = "<h1>Please set your username in the config file.</h1>";
+            throw new Error("Username not set in config file.");
+        }
+
+        let profileId2_user = "{{ compare_username }}"; // optional username for the player to compare against
+
+        const profileId1 = "{{ username }}"; // 
+        
+        function update() {
+            // find next competitor
+            fetch('https://board.portal2.sr/aggregated/sp/json')
+            .then(response => response.json())
+            .then(data => {
+                const players = data['Points']; // list of ids
+                const index = players[profileId1]['scoreData']['scoreRank'] - 1;
+                console.log(index);
+                
+                let profileId2 = profileId2_user; // default to the user if no comparison user is set
+                if (profileId2 !== "") {
+                    // Find the profileId of the player ranked just above (index - 1)
+                    profileId2 = Object.keys(players).find(
+                        id => players[id]['scoreData']['scoreRank'] === index
+                    );
+                }
+
+                console.log(`Comparing ${profileId1} with ${profileId2}`);
+
+                let p1_points = players[profileId1]['scoreData']['score'];
+                let p2_points = players[profileId2]['scoreData']['score'];
+
+                document.querySelector('#player-1 .player-label').textContent = `${players[profileId1]['userData']['boardname']}`;
+                document.querySelector('#player-2 .player-label').textContent = `${players[profileId2]['userData']['boardname']}`;
+                document.querySelector('#player-1 .points').textContent = `${p1_points}`;
+                document.querySelector('#player-2 .points').textContent = `${p2_points}`;
+
+                let delta = p2_points - p1_points;
+
+                document.querySelector('#player-2 .delta').textContent = `${delta >= 0 ? '+' : ''}${delta}`;
+                document.querySelector('#player-2 .delta').style.color = delta >= 0 ? 'green' : 'red';
+                document.querySelector("#player-1 .delta").textContent = `${-delta >= 0 ? '+' : ''}${-delta}`;
+                document.querySelector("#player-1 .delta").style.color = -delta >= 0 ? 'green' : 'red';
+            });
+        }
+        
+        setInterval(update, 1000); // Update every second
+        update(); // Initial call to populate data immediately
+
+    </script>
+    <style>
+        body {
+            font-family: Consolas, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: 0;
+            background-color: rgba(0, 0, 0, 0);
+        }
+        #player-1, #player-2 {
+            margin: 10px;
+            padding: 20px;
+            border: 2px solid #ffffff;
+            border-radius: 10px;
+            background-color: #141414;
+        }
+        .player-label {
+            font-size: 24px;
+            font-weight: bold;
+            color: rgb(255, 255, 255);
+        }
+        .points {
+            font-size: 20px;
+            color: #dbdbdb;
+            text-align: center;
+        }
+
+        .delta {
+            font-size: 18px;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</html> 
