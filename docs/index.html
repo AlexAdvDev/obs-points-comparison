@@ -16,6 +16,7 @@
             <select class="type">
                 <option value="sp">Singleplayer</option>
                 <option value="coop">Cooperative</option>
+                <option value="overall">Overall</option>
             </select>
         </div>
         <div class="user_popup"></div>
@@ -90,7 +91,7 @@
             
 
             let players = [];
-            fetch('https://board.portal2.sr/aggregated/sp/json')
+            fetch(`https://board.portal2.sr/aggregated/overall/json`)
                 .then(response => response.json())
                 .then(data => {
                     players = data['Points'];
