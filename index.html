@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Points Comparison</title>
+    </head>
+
+    <body>
+        <h1>Points Comparison</h1>
+        <p>little obs points comparison thingy</p>
+        <div class="points-url"></div>
+        <div class="points-button">Copy to clipboard</div>
+        <div class="users">
+            <input class="user" id="player-1" placeholder="Your board.portal2.sr User" required>
+            <input class="user" id="player-2" placeholder="Optional other User">
+        </div>
+        <div class="user_popup"></div>
+        <p>the second player is optional, it will compare against the next ranked player if not set.</p>
+    </body>
+    <script>
+        document.onload = main();
+
+        function main() {
+            let player1 = document.querySelector("#player-1");
+            let player2 = document.querySelector("#player-2");
+            let points_url = document.querySelector(".points-url");
+            let points_button = document.querySelector(".points-button");
+            let user_popup = document.querySelector(".user_popup");
+
+            player1.addEventListener("input", function() {
+                updateUrl();
+            });
+            player2.addEventListener("input", function() {
+                updateUrl();
+            });
+
+            points_url.addEventListener("click", function() {
+                // open in new tab
+                window.open(points_url.textContent, "_blank");
+            });
+
+            points_button.addEventListener("click", function() {
+                navigator.clipboard.writeText(points_url.textContent)
+                    .then(() => {
+                        points_button.textContent = "Copied!";
+                        setTimeout(() => {
+                            points_button.textContent = "Copy to clipboard";
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                    });
+            });
+
+            function updateUrl() {
+                let player1_id = player1.value.trim();
+                let player2_id = player2.value.trim();
+
+                let url = `https://alexadvdev.github.io/obs-points-comparison/points.html?userid=${player1_id}`;
+                if (player2_id !== "") {
+                    url += `&compare_userid=${player2_id}`;
+                }
+
+                points_url.textContent = url;
+            }
+
+            // ahhhhhhh
+            player1.addEventListener("focus", function() {
+                user_select_popup(player1);
+            });
+            player2.addEventListener("focus", function() {
+                user_select_popup(player2);
+            });
+            player1.addEventListener("input", function() {
+                user_select_popup(player1);
+            });
+            player2.addEventListener("input", function() {
+                user_select_popup(player2);
+            });
+
+            
+
+            let players = [];
+            fetch('https://board.portal2.sr/aggregated/sp/json')
+                .then(response => response.json())
+                .then(data => {
+                    players = data['Points'];
+                });
+
+            user_select_popup = (input) => {
+                let username = input.value.trim();
+
+                // get top 5 players with usernames beginning with the input value
+                let matches = Object.values(players).filter(player => 
+                    player['userData']['boardname'].toLowerCase().startsWith(username.toLowerCase())
+                ).slice(0, 5);
+
+                user_popup.innerHTML = matches.map(player => {
+                    // Find the key (userid) for this player object in the players object
+                    let userid = Object.keys(players).find(key => players[key] === player);
+                    return `<div class="user_selection" userid="${userid}"><img src="${player['userData']['avatar']}" class="avatar">${player['userData']['boardname']}</div>`;
+                }).join("");
+                user_popup.style.display = "block";
+                user_popup.style.position = "absolute";
+                user_popup.style.backgroundColor = "#333";
+                user_popup.style.color = "white";
+                user_popup.style.padding = "10px";
+                user_popup.style.borderRadius = "5px";
+                user_popup.style.zIndex = "1000";
+                user_popup.style.top = input.getBoundingClientRect().bottom + "px";
+                user_popup.style.left = input.getBoundingClientRect().left + "px";
+                user_popup.style.maxHeight = "200px";
+                user_popup.style.overflowY = "auto";
+
+                let user_selections = user_popup.querySelectorAll(".user_selection");
+                user_selections.forEach(selection => {
+                    selection.addEventListener("click", function() {
+                        console.log("test")
+                        input.value = this.getAttribute("userid");
+                        console.log(this.getAttribute("userid"));
+                        user_popup.style.display = "none";
+                        updateUrl();
+                    });
+                });
+            };
+        }
+
+    </script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: black;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .points-url {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #333;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .points-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .points-button:hover {
+            background-color: #0056b3;
+        }
+        .users {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .user {
+            margin: 5px 0;
+            padding: 10px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #222;
+            color: white;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            outline: none;
+        }
+        .user:focus {
+            border-color: #007bff;
+        }
+
+        .user_selection {
+            padding: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .user_selection:hover {
+            background-color: #444;
+        }
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+    </style>
+</html>
