@@ -9,17 +9,29 @@
         <div id="player-2"><div class="player-label"></div><div class="points"></div><div class="delta"></div></div>
     </body>
     <script>
-        if ("{{ username }}" === "") {
-            document.body.innerHTML = "<h1>Please set your username in the config file.</h1>";
-            throw new Error("Username not set");
+        function findGetParameter(parameterName) {
+            var result = null,
+                tmp = [];
+            location.search
+                .substr(1)
+                .split("&")
+                .forEach(function (item) {
+                    tmp = item.split("=");
+                    if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+                });
+            return result;
+        }
+        
+        const profileId1 = findGetParameter("userid");
+        let profileId2_user = findGetParameter("compare_userid"); // optional username for the player to compare against
+
+        if (profileId1 === "") {
+            document.body.innerHTML = "<h1>Please set your userid</h1>";
+            throw new Error("Userid not set");
         }
 
-        let profileId2_user = "{{ compare_username }}"; // optional username for the player to compare against
-
-        const profileId1 = "{{ username }}"; // 
-        
         function update() {
-            // find next competitor
+            // find next user
             fetch('https://board.portal2.sr/aggregated/sp/json')
             .then(response => response.json())
             .then(data => {
@@ -53,7 +65,7 @@
                 document.querySelector("#player-1 .delta").style.color = -delta >= 0 ? 'green' : 'red';
             });
         }
-        
+
         setInterval(update, 10000); // Update every 10 seconds
         update(); // Initial call to populate data immediately
 
