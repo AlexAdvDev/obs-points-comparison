@@ -23,6 +23,7 @@
         }
         const profileId1 = findGetParameter("userid");
         let profileId2_user = findGetParameter("compare_userid"); // optional username for the player to compare against
+        let type = findGetParameter("type") || "sp"; // default to singleplayer if not specified
 
         if (profileId1 == null) {
             document.body.innerHTML = "<h1>Please set your userid</h1>";
@@ -31,7 +32,7 @@
 
         function update() {
             // find next competitor
-            fetch('https://board.portal2.sr/aggregated/sp/json')
+            fetch(`https://board.portal2.sr/aggregated/${type}/json`)
             .then(response => response.json())
             .then(data => {
                 const players = data['Points']; // list of ids
