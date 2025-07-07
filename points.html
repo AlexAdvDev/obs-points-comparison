@@ -24,7 +24,7 @@
         const profileId1 = findGetParameter("userid");
         let profileId2_user = findGetParameter("compare_userid"); // optional username for the player to compare against
 
-        if (profileId1 === "") {
+        if (profileId1 == null) {
             document.body.innerHTML = "<h1>Please set your userid</h1>";
             throw new Error("Userid not set");
         }
@@ -39,7 +39,7 @@
                 console.log(index);
                 
                 let profileId2 = profileId2_user;
-                if (profileId2 === "") {
+                if (profileId2 == null) {
                     // Find the profileId of the player ranked just above (index - 1)
                     profileId2 = Object.keys(players).find(
                         id => players[id]['scoreData']['scoreRank'] === index
