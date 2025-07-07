@@ -11,7 +11,7 @@
     <script>
         if ("{{ username }}" === "") {
             document.body.innerHTML = "<h1>Please set your username in the config file.</h1>";
-            throw new Error("Username not set in config file.");
+            throw new Error("Username not set");
         }
 
         let profileId2_user = "{{ compare_username }}"; // optional username for the player to compare against
@@ -54,7 +54,7 @@
             });
         }
         
-        setInterval(update, 1000); // Update every second
+        setInterval(update, 10000); // Update every 10 seconds
         update(); // Initial call to populate data immediately
 
     </script>
